@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <script>
+    // آلية فرض تحديث الكاش والتخلص من الكاش القديم فوراً عند تثبيت نسخة جديدة
+    // قمنا بتحديث النسخة هنا إلى 1.7
+    const CURRENT_VERSION = "1.7";
+    const savedVersion = localStorage.getItem("book1_tracker_app_version");
+    if (savedVersion !== CURRENT_VERSION) {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(registrations => {
+          for (let registration of registrations) {
+            registration.unregister();
+          }
+        });
+      }
+      if ('caches' in window) {
+        caches.keys().then(names => {
+          for (let name of names) {
+            caches.delete(name);
+          }
+        });
+      }
+      localStorage.setItem("book1_tracker_app_version", CURRENT_VERSION);
+      // مسح الكاش من الذاكرة المحلية وإعادة تحميل الصفحة فوراً
+      setTimeout(() => {
+        window.location.reload(true);
+      }, 150);
+    }
+  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>دفتر الحسابات اليومي — إدارة الإيرادات والإيداعات</title>
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <link rel="stylesheet" href="styles.css">
+  
+  <link rel="manifest" href="manifest.json">
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <aside class="sidebar">
+      <div class="logo-container">
+        <img src="logo.png" alt="شعار البرنامج" style="width: 45px; height: 45px; border-radius: var(--border-radius-md); box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4); object-fit: cover;">
+        <span class="logo-text">دفتر الحسابات</span>
+      </div>
+      
+      <ul class="menu-list">
+        <li class="menu-item active" id="menu-dashboard" onclick="switchTab('dashboard')">
+          <i class="fa-solid fa-chart-line"></i>
+          <span>لوحة التحكم الرئيسية</span>
+        </li>
+        <li class="menu-item" id="menu-yearly" onclick="switchTab('yearly')">
+          <i class="fa-solid fa-calendar-days"></i>
+          <span>لوحة المتابعة السنوية</span>
+        </li>
+        <li class="menu-item" id="menu-analytics" onclick="switchTab('analytics')">
+          <i class="fa-solid fa-chart-pie"></i>
+          <span>التقارير والمخططات</span>
+        </li>
+        <li class="menu-item" onclick="exportDataToCSV()">
+          <i class="fa-solid fa-file-excel"></i>
+          <span>تصدير لملف Excel</span>
+        </li>
+      </ul>
+      
+      <div style="text-align: center; margin-top: 20px; font-family: 'Outfit', sans-serif; font-size: 0.85rem; font-weight: 600; color: rgba(255, 255, 255, 0.2); letter-spacing: 2.5px; text-transform: uppercase; transition: var(--transition-smooth); cursor: default;" onmouseover="this.style.color='var(--accent-secondary)';" onmouseout="this.style.color='rgba(255, 255, 255, 0.2)';">
+        moataz
+        <div style="font-size: 0.65rem; letter-spacing: 1px; color: rgba(255, 255, 255, 0.15); margin-top: 4px; font-weight: 500; text-transform: none;">v1.7</div>
+      </div>
+      
+      <div class="sidebar-footer" style="display: flex; flex-direction: column; gap: 10px;">
+        <button class="btn-premium" onclick="closeCurrentYearConfirm()" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); box-shadow: 0 4px 20px rgba(16, 185, 129, 0.35);">
+          <i class="fa-solid fa-calendar-check"></i>
+          <span>إغلاق السنة الحالية</span>
+        </button>
+        <button class="btn-premium" onclick="resetAllDataConfirm()">
+          <i class="fa-solid fa-rotate-left"></i>
+          <span>تصفير وحذف البيانات</span>
+        </button>
+      </div>
+    </aside>
+    
+    <main class="main-content">
+      
+      <header class="top-header">
+        <div class="header-title-area">
+          <h1>دفتر الإدخال اليومي</h1>
+          <span class="header-subtitle">برنامج تفاعلي لحساب الترحيل التلقائي والإيداعات الأسبوعية بالريال السعودي</span>
+        </div>
+        
+        <div class="header-actions">
+          <div class="month-selector-wrapper">
+            <i class="fa-regular fa-calendar-days" style="color: var(--accent-primary)"></i>
+            <select id="month-select" onchange="initializeMonthStructure()">
+              <option value="1">يناير</option>
+              <option value="2">فبراير</option>
+              <option value="3">مارس</option>
+              <option value="4">أبريل</option>
+              <option value="5">مايو</option>
+              <option value="6">يونيو</option>
+              <option value="7">يوليو</option>
+              <option value="8">أغسطس</option>
+              <option value="9">سبتمبر</option>
+              <option value="10">أكتوبر</option>
+              <option value="11">نوفمبر</option>
+              <option value="12">ديسمبر</option>
+            </select>
+            <span style="color: rgba(255,255,255,0.15); font-weight: 300; pointer-events: none; margin: 0 4px;">|</span>
+            <select id="year-select" onchange="initializeMonthStructure()">
+              </select>
+          </div>
+          
+          <button class="btn-glass" onclick="toggleTheme()" id="theme-toggle-btn" style="gap: 8px;">
+            <i class="fa-solid fa-wand-magic-sparkles" style="color: var(--accent-primary)"></i>
+            <span id="theme-btn-text">المظهر البسيط الأنيق</span>
+          </button>
+        </div>
+      </header>
+
+      <section class="metrics-grid">
+        
+        <div class="metric-card revenue">
+          <div class="metric-info">
+            <span class="metric-label">إجمالي الإيرادات اليومية</span>
+            <div class="metric-value" id="metric-total-revenue">
+              0.00 <span class="metric-currency">ر.س</span>
+            </div>
+          </div>
+          <div class="metric-icon-box">
+            <i class="fa-solid fa-chart-line"></i>
+          </div>
+        </div>
+
+        <div class="metric-card deposit">
+          <div class="metric-info">
+            <span class="metric-label">إجمالي الودائع البنكية</span>
+            <div class="metric-value" id="metric-total-deposits">
+              0.00 <span class="metric-currency">ر.س</span>
+            </div>
+          </div>
+          <div class="metric-icon-box">
+            <i class="fa-solid fa-building-columns"></i>
+          </div>
+        </div>
+
+        <div class="metric-card remaining">
+          <div class="metric-info">
+            <span class="metric-label">المتبقي من آخر إيداع</span>
+            <div class="metric-value" id="metric-total-remaining">
+              0.00 <span class="metric-currency">ر.س</span>
+            </div>
+          </div>
+          <div class="metric-icon-box">
+            <i class="fa-solid fa-sack-dollar"></i>
+          </div>
+        </div>
+
+        <div class="metric-card average">
+          <div class="metric-info">
+            <span class="metric-label">متوسط الإيراد اليومي</span>
+            <div class="metric-value" id="metric-daily-average">
+              0.00 <span class="metric-currency">ر.س</span>
+            </div>
+          </div>
+          <div class="metric-icon-box">
+            <i class="fa-solid fa-calculator"></i>
+          </div>
+        </div>
+        
+      </section>
+
+      <div class="dashboard-grid">
+        
+        <div class="dashboard-column">
+          <div class="glass-panel" style="padding-bottom: 1.5rem;">
+            <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem; flex-wrap: wrap; gap: 12px;">
+              <h2 style="font-size: 1.1rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 8px;">
+                <i class="fa-solid fa-list-check" style="color: var(--accent-primary)"></i>
+                <span>دفتر الإدخال اليومي (جدول تفاعلي)</span>
+              </h2>
+              
+              <div class="panel-actions">
+                <div class="filter-tabs">
+                  <button class="filter-tab active" onclick="filterDailyTable('all')" id="tab-all">الكل</button>
+                  <button class="filter-tab" onclick="filterDailyTable(1)" id="tab-w1">أسبوع 1</button>
+                  <button class="filter-tab" onclick="filterDailyTable(2)" id="tab-w2">أسبوع 2</button>
+                  <button class="filter-tab" onclick="filterDailyTable(3)" id="tab-w3">أسبوع 3</button>
+                  <button class="filter-tab" onclick="filterDailyTable(4)" id="tab-w4">أسبوع 4</button>
+                </div>
+              </div>
+            </div>
+            
+            <div class="daily-table-container">
+              <table class="daily-table" id="daily-revenue-table">
+                <thead>
+                  <tr>
+                    <th style="width: 70px; text-align: center;">م</th>
+                    <th style="width: 160px; text-align: right;">اليوم / التاريخ</th>
+                    <th style="width: 110px; text-align: center;">رقم الأسبوع</th>
+                    <th style="text-align: left;">قيمة الإيراد اليومي (ريال سعودي)</th>
+                  </tr>
+                </thead>
+                <tbody id="daily-table-body">
+                  </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        
+        <div class="dashboard-column">
+          <div class="glass-panel" style="padding-bottom: 1.5rem;">
+            <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem;">
+              <h2 style="font-size: 1.1rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 8px;">
+                <i class="fa-solid fa-arrows-spin" style="color: var(--accent-secondary)"></i>
+                <span>مخطط تدفق الحسابات والترحيل الأسبوعي</span>
+              </h2>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <label class="auto-calc-toggle-label" style="font-size: 0.85rem; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                  <input type="checkbox" id="auto-calc-toggle" onchange="toggleAutoCalc(this.checked)" checked style="accent-color: var(--accent-primary);">
+                  <span>توزيع تلقائي (مضاعفات 50)</span>
+                </label>
+              </div>
+            </div>
+            
+            <div class="weekly-flow-cards-container" id="weekly-flow-cards-container">
+              </div>
+          </div>
+        </div>
+        
+      </div>
+
+      <div class="charts-grid" id="charts-section-wrapper">
+        <div class="glass-panel" style="background: rgba(10, 11, 18, 0.4); border-color: rgba(255,255,255,0.03);">
+          <h3 style="font-size: 0.95rem; margin-bottom: 12px; color: var(--text-secondary); display: flex; align-items: center; gap: 8px;">
+            <i class="fa-solid fa-chart-area" style="color: var(--color-revenue)"></i>
+            <span>منحنى تذبذب الإيراد اليومي</span>
+          </h3>
+          <div class="chart-container">
+            <canvas id="dailyTrendChart"></canvas>
+          </div>
+        </div>
+        
+        <div class="glass-panel" style="background: rgba(10, 11, 18, 0.4); border-color: rgba(255,255,255,0.03);">
+          <h3 style="font-size: 0.95rem; margin-bottom: 12px; color: var(--text-secondary); display: flex; align-items: center; gap: 8px;">
+            <i class="fa-solid fa-chart-column" style="color: var(--color-deposit)"></i>
+            <span>مقارنة الإيرادات الأسبوعية والإيداعات البنكية والمتبقي</span>
+          </h3>
+          <div class="chart-container">
+            <canvas id="weeklyComparisonChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <section class="glass-panel" id="yearly-section-wrapper" style="display: none; margin-bottom: 2rem;">
+        <div class="panel-header" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05); padding-bottom: 1rem; margin-bottom: 1.5rem;">
+          <h2 style="font-size: 1.2rem; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 8px;">
+            <i class="fa-solid fa-calendar-days" style="color: var(--accent-primary)"></i>
+            <span>لوحة المتابعة السنوية والترحيل بين الشهور (12 شهراً لعام <span id="yearly-year-display">2026</span>)</span>
+          </h2>
+          <span class="header-subtitle">عرض شامل ومتسلسل لتدفقات الأرصدة والودائع والمتبقي على مدار العام بالريال السعودي</span>
+        </div>
+        
+        <div class="yearly-months-grid" id="yearly-months-container">
+          </div>
+      </section>
+
+    </main>
+  </div>
+
+  <div class="toast" id="app-toast">
+    <i class="fa-solid fa-circle-check"></i>
+    <span id="toast-message">تم تحديث الحسابات والترحيل بنجاح!</span>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <script src="app.js"></script>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(reg => console.log('Service Worker Registered successfully!', reg))
+          .catch(err => console.log('Service Worker Registration failed!', err));
+      });
+    }
+  </script>
+</body>
+</html>

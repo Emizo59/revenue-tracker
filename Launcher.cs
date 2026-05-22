@@ -28,7 +28,7 @@ namespace RevenueTrackerLauncher
                 }
 
                 // إصدار الموارد المدمجة في هذا الملف التنفيذي الحالي
-                double embeddedVersion = 1.5; 
+                double embeddedVersion = 1.7; 
 
                 // قراءة رقم الإصدار المحلي الحالي المخزن في مجلد AppData للجهاز
                 double localVersion = 0.0;
@@ -127,10 +127,30 @@ namespace RevenueTrackerLauncher
                 // تحويل مسار الملف إلى رابط URL قياسي مشفر بشكل صحيح (يتعامل مع المسافات والحروف العربية)
                 string fileUrl = new Uri(htmlPath).AbsoluteUri;
 
-                // إعداد متغيرات التشغيل لفتح واجهة ويب مستقلة ونظيفة (Edge App Mode) في وضع ملء الشاشة الكامل
+                // الحصول على أبعاد الشاشة الحالية لحساب موضع الوسط بدقة
+                int screenWidth = System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width;
+                int screenHeight = System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height;
+
+                // اختيار حجم نافذة فخم ومناسب جداً للكمبيوتر (90% من الشاشة أو بحد أقصى 1400x850 لراحة العين)
+                int winWidth = Math.Min(1400, (int)(screenWidth * 0.9));
+                int winHeight = Math.Min(850, (int)(screenHeight * 0.9));
+
+                // التحقق من توافق الحجم مع الشاشات الصغيرة
+                if (winWidth < 1024) winWidth = Math.Min(1024, screenWidth);
+                if (winHeight < 700) winHeight = Math.Min(700, screenHeight);
+
+                // حساب الإحداثيات اللازمة لتمركز النافذة تماماً في منتصف الشاشة
+                int posX = (screenWidth - winWidth) / 2;
+                int posY = (screenHeight - winHeight) / 2;
+
+                // إعداد متغيرات التشغيل لفتح واجهة ويب مستقلة ونظيفة (Edge App Mode) متمركزة في منتصف الشاشة وبحجم مثالي
                 string arguments = string.Format(
-                    "--app=\"{0}\" --start-maximized",
-                    fileUrl
+                    "--app=\"{0}\" --window-size={1},{2} --window-position={3},{4}",
+                    fileUrl,
+                    winWidth,
+                    winHeight,
+                    posX,
+                    posY
                 );
                 
                 ProcessStartInfo psi = new ProcessStartInfo();
