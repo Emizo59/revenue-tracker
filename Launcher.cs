@@ -28,7 +28,7 @@ namespace RevenueTrackerLauncher
                 }
 
                 // إصدار الموارد المدمجة في هذا الملف التنفيذي الحالي
-                double embeddedVersion = 2.2; 
+                double embeddedVersion = 2.3; 
 
                 // قراءة رقم الإصدار المحلي الحالي المخزن في مجلد AppData للجهاز
                 double localVersion = 0.0;
@@ -140,10 +140,12 @@ namespace RevenueTrackerLauncher
                 int posX = 0;
                 int posY = 0;
 
-                // إعداد متغيرات التشغيل لفتح واجهة ويب مستقلة ونظيفة (Edge App Mode) بوضع النافذة الواسعة الممتدة لرؤية كل شيء دفعة واحدة
+                // إعداد متغيرات التشغيل لفتح واجهة ويب مستقلة ونظيفة (Edge App Mode) بوضع النافذة الواسعة الممتدة مع عزل كامل للملف التعريفي وعرض الشعار
+                string userProfilePath = Path.Combine(appDataDir, "EdgeProfile");
                 string arguments = string.Format(
-                    "--app=\"{0}\" --window-size={1},{2} --window-position={3},{4} --start-maximized",
+                    "--app=\"{0}\" --user-data-dir=\"{1}\" --window-size={2},{3} --window-position={4},{5} --start-maximized",
                     fileUrl,
+                    userProfilePath,
                     winWidth,
                     winHeight,
                     posX,

@@ -5,7 +5,7 @@
   <script>
     // آلية فرض تحديث الكاش والتخلص من الكاش القديم فوراً عند تثبيت نسخة جديدة
     // قمنا بتحديث النسخة هنا إلى 2.0
-    const CURRENT_VERSION = "2.2";
+    const CURRENT_VERSION = "2.3";
     const savedVersion = localStorage.getItem("book1_tracker_app_version");
     if (savedVersion !== CURRENT_VERSION) {
       if ('serviceWorker' in navigator) {
@@ -37,6 +37,11 @@
   <link rel="stylesheet" href="styles.css">
   
   <link rel="manifest" href="manifest.json">
+  
+  <!-- وسوم الأيقونة المفضلة الرسمية لتخصيص الأيقونة في شريط المهام والتوافق التام -->
+  <link rel="shortcut icon" type="image/png" href="logo.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="logo.png">
+  <link rel="apple-touch-icon" href="logo.png">
 </head>
 <body>
 
@@ -69,7 +74,7 @@
       
       <div style="text-align: center; margin-top: 20px; font-family: 'Outfit', sans-serif; font-size: 0.85rem; font-weight: 600; color: rgba(255, 255, 255, 0.2); letter-spacing: 2.5px; text-transform: uppercase; transition: var(--transition-smooth); cursor: default;" onmouseover="this.style.color='var(--accent-secondary)';" onmouseout="this.style.color='rgba(255, 255, 255, 0.2)';">
         moataz
-        <div style="font-size: 0.65rem; letter-spacing: 1px; color: rgba(255, 255, 255, 0.15); margin-top: 4px; font-weight: 500; text-transform: none;">v2.2</div>
+        <div style="font-size: 0.65rem; letter-spacing: 1px; color: rgba(255, 255, 255, 0.15); margin-top: 4px; font-weight: 500; text-transform: none;">v2.3</div>
       </div>
       
       <div class="sidebar-footer" style="display: flex; flex-direction: column; gap: 10px;">
@@ -295,10 +300,105 @@
   <script src="app.js"></script>
 
   <script>
-    if ('serviceWorker' in navigator) {
+    // آلية فحص التحديثات الفورية الشاملة (المتوافقة مع التشغيل المحلي file:// والويب)
+    const CURRENT_VERSION = "2.3";
+
+    async function checkUniversalUpdate() {
+      if (!navigator.onLine) return;
+      try {
+        const response = await fetch('https://raw.githubusercontent.com/Emizo59/revenue-tracker/main/update.txt?t=' + Date.now());
+        if (!response.ok) return;
+        const text = await response.text();
+        const lines = text.split(/\r?\n/).filter(l => l.trim() !== "");
+        if (lines.length > 0) {
+          const remoteVersionStr = lines[0].trim();
+          const remoteVersion = parseFloat(remoteVersionStr);
+          const localVersion = parseFloat(CURRENT_VERSION);
+          
+          if (!isNaN(remoteVersion) && !isNaN(localVersion) && remoteVersion > localVersion) {
+            console.log(`Update found! Remote: ${remoteVersionStr}, Local: ${CURRENT_VERSION}`);
+            showUniversalUpdateBanner(remoteVersionStr);
+          }
+        }
+      } catch (err) {
+        console.error('Error checking for updates:', err);
+      }
+    }
+
+    function showUniversalUpdateBanner(remoteVersionStr) {
+      const banner = document.getElementById('update-banner');
+      const btn = document.getElementById('update-btn-now');
+      if (banner && btn) {
+        const descText = banner.querySelector('.update-banner-text p');
+        if (descText) {
+          descText.textContent = `يتوفر الإصدار الجديد (${remoteVersionStr}) للتحميل الفوري. اضغط للتحديث الآن.`;
+        }
+        
+        banner.classList.add('show');
+        
+        btn.onclick = () => {
+          if (window.location.protocol === 'file:') {
+            // وضع التطبيق المكتبي (تم إطلاقه عبر الملف التنفيذي C#)
+            // بما أن متصفح Edge يقفل الملفات المحلية أثناء العمل، سنعرض شاشة زمردية فخمة لغلق البرنامج تلقائياً وتوجيه المستخدم لإعادة تشغيله
+            const overlay = document.createElement('div');
+            overlay.style.position = 'fixed';
+            overlay.style.top = '0';
+            overlay.style.left = '0';
+            overlay.style.width = '100vw';
+            overlay.style.height = '100vh';
+            overlay.style.backgroundColor = 'rgba(15, 23, 42, 0.95)';
+            overlay.style.backdropFilter = 'blur(10px)';
+            overlay.style.zIndex = '99999';
+            overlay.style.display = 'flex';
+            overlay.style.flexDirection = 'column';
+            overlay.style.alignItems = 'center';
+            overlay.style.justifyContent = 'center';
+            overlay.style.color = '#fff';
+            overlay.style.fontFamily = 'Cairo, Segoe UI, sans-serif';
+            overlay.style.direction = 'rtl';
+            overlay.style.textAlign = 'center';
+            overlay.style.padding = '20px';
+
+            overlay.innerHTML = `
+              <div style="background: rgba(30, 41, 59, 0.5); padding: 40px; border-radius: 20px; border: 2px solid #10b981; max-width: 500px; box-shadow: 0 10px 30px rgba(16, 185, 129, 0.2);">
+                <i class="fa-solid fa-arrows-spin fa-spin" style="font-size: 4rem; color: #10b981; margin-bottom: 20px;"></i>
+                <h2 style="font-size: 1.6rem; font-weight: 800; margin-bottom: 15px; font-family: 'Cairo', sans-serif;">جاري الاستعداد لتثبيت التحديث...</h2>
+                <p style="font-size: 1.05rem; color: #94a3b8; line-height: 1.6; margin-bottom: 25px; font-family: 'Cairo', sans-serif;">
+                  تم رصد الإصدار الجديد بنجاح. سيتم إغلاق البرنامج الآن تلقائياً. 
+                  <br><br>
+                  <strong>يرجى تشغيل البرنامج من جديد عبر (دفتر الحسابات.exe)</strong> ليقوم المشغل الذكي بتحميل وتطبيق الترقية فوراً!
+                </p>
+                <div style="font-size: 0.85rem; color: #64748b; font-family: 'Cairo', sans-serif;">سيتم إغلاق هذه النافذة تلقائياً خلال ثوانٍ...</div>
+              </div>
+            `;
+            
+            document.body.appendChild(overlay);
+            
+            setTimeout(() => {
+              window.close();
+            }, 6000);
+          } else {
+            // وضع الويب / GitHub Pages (بروتوكول HTTPS)
+            if ('serviceWorker' in navigator) {
+              navigator.serviceWorker.getRegistration().then(reg => {
+                if (reg && reg.waiting) {
+                  reg.waiting.postMessage('skipWaiting');
+                } else {
+                  window.location.reload();
+                }
+              });
+            } else {
+              window.location.reload();
+            }
+          }
+        };
+      }
+    }
+
+    // تسجيل الـ Service Worker (يظل مفيداً في بيئات الويب فقط مثل GitHub Pages)
+    if ('serviceWorker' in navigator && window.location.protocol !== 'file:') {
       let refreshing = false;
       
-      // إعادة تحميل الصفحة تلقائياً بمجرد تنشيط الـ Service Worker الجديد وتوليه التحكم
       navigator.serviceWorker.addEventListener('controllerchange', () => {
         if (!refreshing) {
           refreshing = true;
@@ -306,19 +406,10 @@
         }
       });
 
-      // دالة إظهار بنر التحديث وتفعيل زر الترقية الفورية
       function showUpdateBanner(waitingWorker) {
-        const banner = document.getElementById('update-banner');
-        const btn = document.getElementById('update-btn-now');
-        if (banner && btn) {
-          banner.classList.add('show');
-          btn.onclick = () => {
-            waitingWorker.postMessage('skipWaiting');
-          };
-        }
+        showUniversalUpdateBanner(CURRENT_VERSION);
       }
 
-      // مراقبة مراحل التثبيت والتنشيط للتحديث الجديد
       function trackInstalling(worker, reg) {
         worker.addEventListener('statechange', () => {
           if (worker.state === 'installed') {
@@ -332,18 +423,15 @@
           .then(reg => {
             console.log('Service Worker Registered successfully!', reg);
             
-            // 1. إذا كان هناك تحديث مثبت بالفعل وينتظر التشغيل
             if (reg.waiting) {
               showUpdateBanner(reg.waiting);
             }
 
-            // 2. إذا وجد تحديثاً جديداً وبدأ في تنزيله وتثبيته
             reg.addEventListener('updatefound', () => {
               const newWorker = reg.installing;
               trackInstalling(newWorker, reg);
             });
 
-            // التحقق من وجود تحديث فور التشغيل
             if (navigator.onLine) {
               reg.update();
             }
@@ -351,7 +439,6 @@
           .catch(err => console.log('Service Worker Registration failed!', err));
       });
 
-      // التحقق من وجود تحديثات فور استعادة الاتصال بالإنترنت
       window.addEventListener('online', () => {
         navigator.serviceWorker.ready.then(reg => {
           console.log('Internet connection restored. Checking for updates...');
@@ -359,6 +446,15 @@
         });
       });
     }
+
+    // بدء فحص التحديثات الشامل فور التشغيل
+    window.addEventListener('load', () => {
+      // الفحص الأول بعد ثانيتين من التشغيل
+      setTimeout(checkUniversalUpdate, 2000);
+      
+      // فحص دوري متكرر كل 60 ثانية
+      setInterval(checkUniversalUpdate, 60000);
+    });
   </script>
 </body>
 </html>
