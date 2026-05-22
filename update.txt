@@ -1,7 +1,11 @@
-2.0
+2.1
 index.html=https://raw.githubusercontent.com/Emizo59/revenue-tracker/main/index.html
 app.js=https://raw.githubusercontent.com/Emizo59/revenue-tracker/main/app.js
 styles.css=https://raw.githubusercontent.com/Emizo59/revenue-tracker/main/styles.css
 logo.png=https://raw.githubusercontent.com/Emizo59/revenue-tracker/main/logo.png
 manifest.json=https://raw.githubusercontent.com/Emizo59/revenue-tracker/main/manifest.json
 sw.js=https://raw.githubusercontent.com/Emizo59/revenue-tracker/main/sw.js
+chart.js=https://raw.githubusercontent.com/Emizo59/revenue-tracker/main/chart.js
+all.min.css=https://raw.githubusercontent.com/Emizo59/revenue-tracker/main/all.min.css
+webfonts/fa-solid-900.woff2=https://raw.githubusercontent.com/Emizo59/revenue-tracker/main/webfonts/fa-solid-900.woff2
+webfonts/fa-regular-400.woff2=https://raw.githubusercontent.com/Emizo59/revenue-tracker/main/webfonts/fa-regular-400.woff2

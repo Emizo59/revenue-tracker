@@ -1,11 +1,15 @@
-const CACHE_NAME = 'revenue-tracker-v2.0';
+const CACHE_NAME = 'revenue-tracker-v2.1';
 const ASSETS = [
   './',
   './index.html',
   './styles.css',
   './app.js',
   './logo.png',
-  './manifest.json'
+  './manifest.json',
+  './chart.js',
+  './all.min.css',
+  './webfonts/fa-solid-900.woff2',
+  './webfonts/fa-regular-400.woff2'
 ];
 
 // حدث التثبيت - التخزين المؤقت للملفات الأساسية

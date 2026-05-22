@@ -868,6 +868,10 @@ function resetAllDataConfirm() {
 
 // Dynamic Charts Render Engine using Chart.js
 function renderCharts() {
+  if (typeof Chart === 'undefined') {
+    console.warn("Chart.js is not loaded. Skipping chart rendering.");
+    return;
+  }
   const dailyLabels = dailyData.map(item => `${item.dayNum}`);
   const dailyRevenues = dailyData.map(item => item.revenue);
   
@@ -1001,6 +1005,9 @@ function renderCharts() {
 
 // Update charts in real-time when inputs are modified
 function updateChartsRealtime() {
+  if (typeof Chart === 'undefined') {
+    return;
+  }
   if (dailyTrendChart) {
     dailyTrendChart.data.datasets[0].data = dailyData.map(item => item.revenue);
     dailyTrendChart.update();

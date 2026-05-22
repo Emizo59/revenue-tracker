@@ -28,7 +28,7 @@ namespace RevenueTrackerLauncher
                 }
 
                 // إصدار الموارد المدمجة في هذا الملف التنفيذي الحالي
-                double embeddedVersion = 2.0; 
+                double embeddedVersion = 2.1; 
 
                 // قراءة رقم الإصدار المحلي الحالي المخزن في مجلد AppData للجهاز
                 double localVersion = 0.0;
@@ -72,6 +72,13 @@ namespace RevenueTrackerLauncher
                     }
 
                     string destPath = Path.Combine(appDataDir, fileName);
+
+                    // تأمين وجود المجلدات الفرعية للملف المستخرج (مثل webfonts)
+                    string destDir = Path.GetDirectoryName(destPath);
+                    if (!Directory.Exists(destDir))
+                    {
+                        Directory.CreateDirectory(destDir);
+                    }
 
                     // استخراج وتحديث الملف في المجلد المحلي إذا لم يكن موجوداً مسبقاً، أو إذا فرضنا الاستخراج بسبب وجود إصدار مدمج أحدث
                     if (!File.Exists(destPath) || forceExtraction)

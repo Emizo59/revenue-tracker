@@ -5,7 +5,7 @@
   <script>
     // آلية فرض تحديث الكاش والتخلص من الكاش القديم فوراً عند تثبيت نسخة جديدة
     // قمنا بتحديث النسخة هنا إلى 2.0
-    const CURRENT_VERSION = "2.0";
+    const CURRENT_VERSION = "2.1";
     const savedVersion = localStorage.getItem("book1_tracker_app_version");
     if (savedVersion !== CURRENT_VERSION) {
       if ('serviceWorker' in navigator) {
@@ -32,7 +32,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>دفتر الحسابات اليومي — إدارة الإيرادات والإيداعات</title>
   
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="all.min.css">
   
   <link rel="stylesheet" href="styles.css">
   
@@ -69,7 +69,7 @@
       
       <div style="text-align: center; margin-top: 20px; font-family: 'Outfit', sans-serif; font-size: 0.85rem; font-weight: 600; color: rgba(255, 255, 255, 0.2); letter-spacing: 2.5px; text-transform: uppercase; transition: var(--transition-smooth); cursor: default;" onmouseover="this.style.color='var(--accent-secondary)';" onmouseout="this.style.color='rgba(255, 255, 255, 0.2)';">
         moataz
-        <div style="font-size: 0.65rem; letter-spacing: 1px; color: rgba(255, 255, 255, 0.15); margin-top: 4px; font-weight: 500; text-transform: none;">v2.0</div>
+        <div style="font-size: 0.65rem; letter-spacing: 1px; color: rgba(255, 255, 255, 0.15); margin-top: 4px; font-weight: 500; text-transform: none;">v2.1</div>
       </div>
       
       <div class="sidebar-footer" style="display: flex; flex-direction: column; gap: 10px;">
@@ -276,7 +276,7 @@
     <span id="toast-message">تم تحديث الحسابات والترحيل بنجاح!</span>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="chart.js"></script>
   
   <script src="app.js"></script>
 
@@ -302,6 +302,14 @@
             }
           })
           .catch(err => console.log('Service Worker Registration failed!', err));
+      });
+
+      // التحقق من وجود تحديثات فور استعادة الاتصال بالإنترنت
+      window.addEventListener('online', () => {
+        navigator.serviceWorker.ready.then(reg => {
+          console.log('Internet connection restored. Checking for updates...');
+          reg.update();
+        });
       });
     }
   </script>
