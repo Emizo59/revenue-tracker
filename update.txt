@@ -1,0 +1,7 @@
+1.6
+index.html=https://raw.githubusercontent.com/Emizo59/book1-revenue-tracker/main/index.html
+app.js=https://raw.githubusercontent.com/Emizo59/book1-revenue-tracker/main/app.js
+styles.css=https://raw.githubusercontent.com/Emizo59/book1-revenue-tracker/main/styles.css
+logo.png=https://raw.githubusercontent.com/Emizo59/book1-revenue-tracker/main/logo.png
+manifest.json=https://raw.githubusercontent.com/Emizo59/book1-revenue-tracker/main/manifest.json
+sw.js=https://raw.githubusercontent.com/Emizo59/book1-revenue-tracker/main/sw.js
