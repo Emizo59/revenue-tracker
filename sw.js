@@ -1,4 +1,4 @@
-const CACHE_NAME = 'revenue-tracker-v2.1';
+const CACHE_NAME = 'revenue-tracker-v2.2';
 const ASSETS = [
   './',
   './index.html',
@@ -45,4 +45,11 @@ self.addEventListener('fetch', (e) => {
       return cachedResponse || fetch(e.request);
     })
   );
+});
+
+// استقبال الرسائل لتفعيل skipWaiting يدوياً من واجهة المستخدم عند طلب التحديث الفوري
+self.addEventListener('message', (e) => {
+  if (e.data === 'skipWaiting') {
+    self.skipWaiting();
+  }
 });

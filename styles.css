@@ -1342,5 +1342,127 @@ body.theme-chic .btn-danger-glass:hover {
   border-color: rgba(239, 68, 68, 0.3);
 }
 
+/* بنر التحديث الفوري الزجاجي الفخم - Glassmorphism Update Banner */
+.update-banner {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(150px);
+  width: 90%;
+  max-width: 550px;
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  border-radius: var(--border-radius-lg);
+  padding: 18px 24px;
+  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.5), 0 0 30px rgba(16, 185, 129, 0.15);
+  z-index: 9999;
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease;
+}
+
+.update-banner.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.update-banner-content {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  justify-content: space-between;
+  direction: rtl;
+}
+
+.update-banner-icon-wrapper {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(16, 185, 129, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  flex-shrink: 0;
+}
+
+.update-banner-icon {
+  font-size: 1.4rem;
+  color: #10b981;
+  animation: pulse-update 2s infinite ease-in-out;
+}
+
+.update-banner-text {
+  flex-grow: 1;
+  text-align: right;
+}
+
+.update-banner-text h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 4px 0;
+  font-family: 'Cairo', sans-serif;
+}
+
+.update-banner-text p {
+  font-size: 0.82rem;
+  color: #94a3b8;
+  margin: 0;
+  font-family: 'Cairo', sans-serif;
+  line-height: 1.4;
+}
+
+.btn-update-now {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border: none;
+  color: #ffffff;
+  padding: 10px 20px;
+  font-family: 'Cairo', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 700;
+  border-radius: var(--border-radius-md);
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35);
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.btn-update-now:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
+  background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+}
+
+.btn-update-now:active {
+  transform: translateY(0);
+}
+
+@keyframes pulse-update {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.15); opacity: 0.8; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* توافق البنر مع الثيم البسيط الأنيق (Light Mode) */
+body.theme-chic .update-banner {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(16, 185, 129, 0.4);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08), 0 0 25px rgba(16, 185, 129, 0.1);
+}
+
+body.theme-chic .update-banner-text h3 {
+  color: #0f172a;
+}
+
+body.theme-chic .update-banner-text p {
+  color: #475569;
+}
+
+
 
 

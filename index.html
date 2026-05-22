@@ -5,7 +5,7 @@
   <script>
     // آلية فرض تحديث الكاش والتخلص من الكاش القديم فوراً عند تثبيت نسخة جديدة
     // قمنا بتحديث النسخة هنا إلى 2.0
-    const CURRENT_VERSION = "2.1";
+    const CURRENT_VERSION = "2.2";
     const savedVersion = localStorage.getItem("book1_tracker_app_version");
     if (savedVersion !== CURRENT_VERSION) {
       if ('serviceWorker' in navigator) {
@@ -69,7 +69,7 @@
       
       <div style="text-align: center; margin-top: 20px; font-family: 'Outfit', sans-serif; font-size: 0.85rem; font-weight: 600; color: rgba(255, 255, 255, 0.2); letter-spacing: 2.5px; text-transform: uppercase; transition: var(--transition-smooth); cursor: default;" onmouseover="this.style.color='var(--accent-secondary)';" onmouseout="this.style.color='rgba(255, 255, 255, 0.2)';">
         moataz
-        <div style="font-size: 0.65rem; letter-spacing: 1px; color: rgba(255, 255, 255, 0.15); margin-top: 4px; font-weight: 500; text-transform: none;">v2.1</div>
+        <div style="font-size: 0.65rem; letter-spacing: 1px; color: rgba(255, 255, 255, 0.15); margin-top: 4px; font-weight: 500; text-transform: none;">v2.2</div>
       </div>
       
       <div class="sidebar-footer" style="display: flex; flex-direction: column; gap: 10px;">
@@ -276,14 +276,29 @@
     <span id="toast-message">تم تحديث الحسابات والترحيل بنجاح!</span>
   </div>
 
+  <!-- بنر التحديث الفوري الزجاجي الفخم -->
+  <div class="update-banner" id="update-banner">
+    <div class="update-banner-content">
+      <div class="update-banner-icon-wrapper">
+        <i class="fa-solid fa-cloud-arrow-down update-banner-icon"></i>
+      </div>
+      <div class="update-banner-text">
+        <h3>يتوفر تحديث جديد للبرنامج!</h3>
+        <p>قم بالترقية الفورية الآن للاستمتاع بآخر الميزات وتحسينات الأداء.</p>
+      </div>
+      <button class="btn-update-now" id="update-btn-now">تحديث الآن</button>
+    </div>
+  </div>
+
   <script src="chart.js"></script>
   
   <script src="app.js"></script>
 
   <script>
     if ('serviceWorker' in navigator) {
-      // إعادة تحميل الصفحة تلقائياً بمجرد تنشيط الـ Service Worker الجديد وتوليه التحكم
       let refreshing = false;
+      
+      // إعادة تحميل الصفحة تلقائياً بمجرد تنشيط الـ Service Worker الجديد وتوليه التحكم
       navigator.serviceWorker.addEventListener('controllerchange', () => {
         if (!refreshing) {
           refreshing = true;
@@ -291,12 +306,44 @@
         }
       });
 
+      // دالة إظهار بنر التحديث وتفعيل زر الترقية الفورية
+      function showUpdateBanner(waitingWorker) {
+        const banner = document.getElementById('update-banner');
+        const btn = document.getElementById('update-btn-now');
+        if (banner && btn) {
+          banner.classList.add('show');
+          btn.onclick = () => {
+            waitingWorker.postMessage('skipWaiting');
+          };
+        }
+      }
+
+      // مراقبة مراحل التثبيت والتنشيط للتحديث الجديد
+      function trackInstalling(worker, reg) {
+        worker.addEventListener('statechange', () => {
+          if (worker.state === 'installed') {
+            showUpdateBanner(reg.waiting);
+          }
+        });
+      }
+
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('sw.js')
           .then(reg => {
             console.log('Service Worker Registered successfully!', reg);
             
-            // التحقق من وجود تحديث فور التشغيل إذا كان التابلت متصلاً بالإنترنت
+            // 1. إذا كان هناك تحديث مثبت بالفعل وينتظر التشغيل
+            if (reg.waiting) {
+              showUpdateBanner(reg.waiting);
+            }
+
+            // 2. إذا وجد تحديثاً جديداً وبدأ في تنزيله وتثبيته
+            reg.addEventListener('updatefound', () => {
+              const newWorker = reg.installing;
+              trackInstalling(newWorker, reg);
+            });
+
+            // التحقق من وجود تحديث فور التشغيل
             if (navigator.onLine) {
               reg.update();
             }
