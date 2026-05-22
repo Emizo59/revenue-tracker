@@ -28,7 +28,7 @@ namespace RevenueTrackerLauncher
                 }
 
                 // إصدار الموارد المدمجة في هذا الملف التنفيذي الحالي
-                double embeddedVersion = 1.7; 
+                double embeddedVersion = 1.8; 
 
                 // قراءة رقم الإصدار المحلي الحالي المخزن في مجلد AppData للجهاز
                 double localVersion = 0.0;
@@ -127,25 +127,15 @@ namespace RevenueTrackerLauncher
                 // تحويل مسار الملف إلى رابط URL قياسي مشفر بشكل صحيح (يتعامل مع المسافات والحروف العربية)
                 string fileUrl = new Uri(htmlPath).AbsoluteUri;
 
-                // الحصول على أبعاد الشاشة الحالية لحساب موضع الوسط بدقة
-                int screenWidth = System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width;
-                int screenHeight = System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height;
+                // الحصول على أبعاد منطقة العمل النشطة (بدون شريط المهام) لملء الشاشة بالكامل في وضع النافذة الواسعة (WINDOWIDE)
+                int winWidth = System.Windows.Forms.Screen.PrimaryScreen.WorkingArea.Width;
+                int winHeight = System.Windows.Forms.Screen.PrimaryScreen.WorkingArea.Height;
+                int posX = 0;
+                int posY = 0;
 
-                // اختيار حجم نافذة فخم ومناسب جداً للكمبيوتر (90% من الشاشة أو بحد أقصى 1400x850 لراحة العين)
-                int winWidth = Math.Min(1400, (int)(screenWidth * 0.9));
-                int winHeight = Math.Min(850, (int)(screenHeight * 0.9));
-
-                // التحقق من توافق الحجم مع الشاشات الصغيرة
-                if (winWidth < 1024) winWidth = Math.Min(1024, screenWidth);
-                if (winHeight < 700) winHeight = Math.Min(700, screenHeight);
-
-                // حساب الإحداثيات اللازمة لتمركز النافذة تماماً في منتصف الشاشة
-                int posX = (screenWidth - winWidth) / 2;
-                int posY = (screenHeight - winHeight) / 2;
-
-                // إعداد متغيرات التشغيل لفتح واجهة ويب مستقلة ونظيفة (Edge App Mode) متمركزة في منتصف الشاشة وبحجم مثالي
+                // إعداد متغيرات التشغيل لفتح واجهة ويب مستقلة ونظيفة (Edge App Mode) بوضع النافذة الواسعة الممتدة لرؤية كل شيء دفعة واحدة
                 string arguments = string.Format(
-                    "--app=\"{0}\" --window-size={1},{2} --window-position={3},{4}",
+                    "--app=\"{0}\" --window-size={1},{2} --window-position={3},{4} --start-maximized",
                     fileUrl,
                     winWidth,
                     winHeight,
@@ -193,7 +183,7 @@ namespace RevenueTrackerLauncher
             }
             catch {}
 
-            string defaultUrl = "https://raw.githubusercontent.com/Emizo59/book1-revenue-tracker/main/update.txt";
+            string defaultUrl = "https://raw.githubusercontent.com/Emizo59/revenue-tracker/main/update.txt";
             string updateUrl = defaultUrl;
             string customUrlPath = Path.Combine(appDataDir, "update_url.txt");
 
@@ -203,8 +193,8 @@ namespace RevenueTrackerLauncher
                 {
                     string customUrl = File.ReadAllText(customUrlPath).Trim();
                     
-                    // إذا كان الملف المحلي يحتوي على رابط المستودع القديم (moataz)، نقوم بترقيته تلقائياً لمستودعك الجديد
-                    if (customUrl.Contains("githubusercontent.com/moataz/"))
+                    // إذا كان الملف المحلي يحتوي على رابط المستودع القديم (moataz) أو المستودع المؤقت (book1-revenue-tracker)، نقوم بترقيته تلقائياً لمستودعك الجديد
+                    if (customUrl.Contains("githubusercontent.com/moataz/") || customUrl.Contains("book1-revenue-tracker"))
                     {
                         customUrl = defaultUrl;
                         File.WriteAllText(customUrlPath, defaultUrl);
