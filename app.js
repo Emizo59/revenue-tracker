@@ -769,101 +769,174 @@ function toggleAutoCalc(checked) {
 
 
 
+// Reusable Glassmorphism Custom Confirmation Modal
+function showGlassConfirm(message, title, type, onConfirm) {
+  const existing = document.getElementById("glass-confirm-modal");
+  if (existing) existing.remove();
+  
+  const modal = document.createElement("div");
+  modal.id = "glass-confirm-modal";
+  
+  let iconClass = "fa-circle-question";
+  let iconColor = "var(--accent-secondary)";
+  let btnClass = "btn-confirm-yes";
+  
+  if (type === "danger") {
+    iconClass = "fa-triangle-exclamation";
+    iconColor = "#ef4444";
+    btnClass = "btn-confirm-danger";
+  } else if (type === "success") {
+    iconClass = "fa-calendar-check";
+    iconColor = "#10b981";
+    btnClass = "btn-confirm-success";
+  }
+  
+  modal.innerHTML = `
+    <div class="glass-confirm-box">
+      <div class="glass-confirm-header">
+        <i class="fa-solid ${iconClass} glass-confirm-icon" style="color: ${iconColor}; filter: drop-shadow(0 0 10px ${iconColor}40);"></i>
+        <h3>${title || 'تأكيد الإجراء'}</h3>
+      </div>
+      <div class="glass-confirm-body">
+        <p>${message}</p>
+      </div>
+      <div class="glass-confirm-actions">
+        <button class="btn-glass-confirm ${btnClass}">تأكيد</button>
+        <button class="btn-glass-confirm btn-confirm-no">إلغاء</button>
+      </div>
+    </div>
+  `;
+  
+  document.body.appendChild(modal);
+  
+  setTimeout(() => {
+    modal.classList.add("active");
+  }, 10);
+  
+  const btnYes = modal.querySelector(`.${btnClass}`);
+  const btnNo = modal.querySelector(".btn-confirm-no");
+  
+  btnYes.onclick = () => {
+    modal.classList.remove("active");
+    setTimeout(() => {
+      modal.remove();
+      if (onConfirm) onConfirm();
+    }, 300);
+  };
+  
+  btnNo.onclick = () => {
+    modal.classList.remove("active");
+    setTimeout(() => {
+      modal.remove();
+    }, 300);
+  };
+}
+
 // Close current year and transition to the next year
 function closeCurrentYearConfirm() {
   const nextYear = currentYear + 1;
-  if (confirm(`هل أنت متأكد من رغبتك في إغلاق السنة الحالية [${currentYear}] وحفظ كافة إغلاقاتها السنوية، والذهاب إلى السنة الجديدة [${nextYear}]؟`)) {
-    // 1. Add the next year to availableYears if it's not already in there
-    if (!availableYears.includes(nextYear)) {
-      availableYears.push(nextYear);
-      availableYears.sort((a, b) => a - b);
-      localStorage.setItem("book1_tracker_available_years", JSON.stringify(availableYears));
-    }
-    
-    // 2. Set current year to next year and current month to January (1)
-    currentYear = nextYear;
-    currentMonth = 1;
-    
-    // 3. Re-render year dropdown and update DOM select elements
-    renderYearDropdown();
-    
-    const yearSelect = document.getElementById("year-select");
-    if (yearSelect) {
-      yearSelect.value = currentYear;
-    }
-    
-    const monthSelect = document.getElementById("month-select");
-    if (monthSelect) {
-      monthSelect.value = "1";
-    }
-    
-    // 4. Load data and rebuild interface for the new year + month
-    initializeMonthStructure();
-    
-    // 5. Show toast notification
-    showToast(`تم إغلاق سنة ${currentYear - 1} والذهاب إلى سنة ${currentYear} بنجاح!`);
-  }
-}
-
-// Reset all 12 months after confirmation, and roll over to the next year if December was active
-function resetAllDataConfirm() {
-  if (confirm("هل أنت متأكد من تصفير وحذف البيانات لجميع شهور السنة؟ لا يمكن التراجع عن هذه الخطوة.")) {
-    // Check if December (month 12) had values in it
-    let decemberWasActive = false;
-    const decKey = `book1_tracker_data_${currentYear}_12`;
-    const decSaved = localStorage.getItem(decKey);
-    if (decSaved) {
-      try {
-        const parsedDec = JSON.parse(decSaved);
-        const hasRevenue = parsedDec.dailyData && parsedDec.dailyData.some(d => parseFloat(d.revenue || 0) > 0);
-        const hasDeposit = parsedDec.weeklyDeposits && Object.values(parsedDec.weeklyDeposits).some(dep => parseFloat(dep || 0) > 0);
-        if (hasRevenue || hasDeposit) {
-          decemberWasActive = true;
-        }
-      } catch (e) {
-        console.error("Error checking December status", e);
-      }
-    }
-
-    // Reset data for all 12 months of the current year
-    for (let m = 1; m <= 12; m++) {
-      localStorage.removeItem(`book1_tracker_data_${currentYear}_${m}`);
-    }
-
-    if (decemberWasActive) {
-      // Transition to the next year
-      currentYear++;
-      currentMonth = 1; // Start in January of the new year
-      
-      // Save new year in available years list
-      if (!availableYears.includes(currentYear)) {
-        availableYears.push(currentYear);
+  showGlassConfirm(
+    `هل أنت متأكد من رغبتك في إغلاق السنة الحالية [${currentYear}] وحفظ كافة إغلاقاتها السنوية، والذهاب إلى السنة الجديدة [${nextYear}]؟`,
+    "تأكيد إغلاق السنة الحالية",
+    "success",
+    () => {
+      // 1. Add the next year to availableYears if it's not already in there
+      if (!availableYears.includes(nextYear)) {
+        availableYears.push(nextYear);
         availableYears.sort((a, b) => a - b);
         localStorage.setItem("book1_tracker_available_years", JSON.stringify(availableYears));
       }
       
-      // Clear data for the new year just in case to be clean
-      for (let m = 1; m <= 12; m++) {
-        localStorage.removeItem(`book1_tracker_data_${currentYear}_${m}`);
-      }
-
+      // 2. Set current year to next year and current month to January (1)
+      currentYear = nextYear;
+      currentMonth = 1;
+      
+      // 3. Re-render year dropdown and update DOM select elements
       renderYearDropdown();
+      
+      const yearSelect = document.getElementById("year-select");
+      if (yearSelect) {
+        yearSelect.value = currentYear;
+      }
+      
       const monthSelect = document.getElementById("month-select");
       if (monthSelect) {
         monthSelect.value = "1";
       }
       
+      // 4. Load data and rebuild interface for the new year + month
       initializeMonthStructure();
       
-      showToast(`تم تصفير كافة البيانات، وبما أن ديسمبر كان نشطاً، تم الانتقال إلى السنة التالية ${currentYear}! وتم حفظ السنوات السابقة للرجوع إليها.`);
-    } else {
-      // Re-initialize current month (which will generate fresh clean data since localStorage is cleared)
-      initializeMonthStructure();
-      renderYearDropdown();
-      
-      showToast(`تم تصفير وحذف كافة البيانات لجميع الشهور في سنة ${currentYear}!`);
+      // 5. Show toast notification
+      showToast(`تم إغلاق سنة ${currentYear - 1} والذهاب إلى سنة ${currentYear} بنجاح!`);
     }
-  }
+  );
+}
+
+// Reset all 12 months after confirmation, and roll over to the next year if December was active
+function resetAllDataConfirm() {
+  showGlassConfirm(
+    "هل أنت متأكد من تصفير وحذف البيانات لجميع شهور السنة؟ لا يمكن التراجع عن هذه الخطوة نهائياً.",
+    "تصفير وحذف البيانات بالكامل",
+    "danger",
+    () => {
+      // Check if December (month 12) had values in it
+      let decemberWasActive = false;
+      const decKey = `book1_tracker_data_${currentYear}_12`;
+      const decSaved = localStorage.getItem(decKey);
+      if (decSaved) {
+        try {
+          const parsedDec = JSON.parse(decSaved);
+          const hasRevenue = parsedDec.dailyData && parsedDec.dailyData.some(d => parseFloat(d.revenue || 0) > 0);
+          const hasDeposit = parsedDec.weeklyDeposits && Object.values(parsedDec.weeklyDeposits).some(dep => parseFloat(dep || 0) > 0);
+          if (hasRevenue || hasDeposit) {
+            decemberWasActive = true;
+          }
+        } catch (e) {
+          console.error("Error checking December status", e);
+        }
+      }
+
+      // Reset data for all 12 months of the current year
+      for (let m = 1; m <= 12; m++) {
+        localStorage.removeItem(`book1_tracker_data_${currentYear}_${m}`);
+      }
+
+      if (decemberWasActive) {
+        // Transition to the next year
+        currentYear++;
+        currentMonth = 1; // Start in January of the new year
+        
+        // Save new year in available years list
+        if (!availableYears.includes(currentYear)) {
+          availableYears.push(currentYear);
+          availableYears.sort((a, b) => a - b);
+          localStorage.setItem("book1_tracker_available_years", JSON.stringify(availableYears));
+        }
+        
+        // Clear data for the new year just in case to be clean
+        for (let m = 1; m <= 12; m++) {
+          localStorage.removeItem(`book1_tracker_data_${currentYear}_${m}`);
+        }
+
+        renderYearDropdown();
+        const monthSelect = document.getElementById("month-select");
+        if (monthSelect) {
+          monthSelect.value = "1";
+        }
+        
+        initializeMonthStructure();
+        
+        showToast(`تم تصفير كافة البيانات، وبما أن ديسمبر كان نشطاً، تم الانتقال إلى السنة التالية ${currentYear}! وتم حفظ السنوات السابقة للرجوع إليها.`);
+      } else {
+        // Re-initialize current month (which will generate fresh clean data since localStorage is cleared)
+        initializeMonthStructure();
+        renderYearDropdown();
+        
+        showToast(`تم تصفير وحذف كافة البيانات لجميع الشهور في سنة ${currentYear}!`);
+      }
+    }
+  );
 }
 
 // Dynamic Charts Render Engine using Chart.js
