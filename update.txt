@@ -1,4 +1,4 @@
-1.8
+1.9
 index.html=https://raw.githubusercontent.com/Emizo59/revenue-tracker/main/index.html
 app.js=https://raw.githubusercontent.com/Emizo59/revenue-tracker/main/app.js
 styles.css=https://raw.githubusercontent.com/Emizo59/revenue-tracker/main/styles.css

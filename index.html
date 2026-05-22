@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <script>
     // آلية فرض تحديث الكاش والتخلص من الكاش القديم فوراً عند تثبيت نسخة جديدة
-    // قمنا بتحديث النسخة هنا إلى 1.8
-    const CURRENT_VERSION = "1.8";
+    // قمنا بتحديث النسخة هنا إلى 1.9
+    const CURRENT_VERSION = "1.9";
     const savedVersion = localStorage.getItem("book1_tracker_app_version");
     if (savedVersion !== CURRENT_VERSION) {
       if ('serviceWorker' in navigator) {
@@ -69,15 +69,15 @@
       
       <div style="text-align: center; margin-top: 20px; font-family: 'Outfit', sans-serif; font-size: 0.85rem; font-weight: 600; color: rgba(255, 255, 255, 0.2); letter-spacing: 2.5px; text-transform: uppercase; transition: var(--transition-smooth); cursor: default;" onmouseover="this.style.color='var(--accent-secondary)';" onmouseout="this.style.color='rgba(255, 255, 255, 0.2)';">
         moataz
-        <div style="font-size: 0.65rem; letter-spacing: 1px; color: rgba(255, 255, 255, 0.15); margin-top: 4px; font-weight: 500; text-transform: none;">v1.8</div>
+        <div style="font-size: 0.65rem; letter-spacing: 1px; color: rgba(255, 255, 255, 0.15); margin-top: 4px; font-weight: 500; text-transform: none;">v1.9</div>
       </div>
       
       <div class="sidebar-footer" style="display: flex; flex-direction: column; gap: 10px;">
-        <button class="btn-premium" onclick="closeCurrentYearConfirm()" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); box-shadow: 0 4px 20px rgba(239, 68, 68, 0.35);">
+        <button class="btn-premium" onclick="closeCurrentYearConfirm()" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); box-shadow: 0 4px 20px rgba(16, 185, 129, 0.35);">
           <i class="fa-solid fa-calendar-check"></i>
           <span>إغلاق السنة الحالية</span>
         </button>
-        <button class="btn-premium" onclick="resetAllDataConfirm()">
+        <button class="btn-premium" onclick="resetAllDataConfirm()" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); box-shadow: 0 4px 20px rgba(239, 68, 68, 0.35);">
           <i class="fa-solid fa-rotate-left"></i>
           <span>تصفير وحذف البيانات</span>
         </button>
