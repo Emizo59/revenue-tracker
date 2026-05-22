@@ -1,4 +1,4 @@
-const CACHE_NAME = 'revenue-tracker-v1.9';
+const CACHE_NAME = 'revenue-tracker-v2.0';
 const ASSETS = [
   './',
   './index.html',
