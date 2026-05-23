@@ -6,15 +6,16 @@
 */
 
 // Application State
-let currentYear = 2026;
-let currentMonth = 1; // January (default)
+const todayDate = new Date();
+let currentYear = todayDate.getFullYear();
+let currentMonth = todayDate.getMonth() + 1; // System month (1-12)
 let daysInMonth = 31;
 let dailyData = []; // Array of { dayNum: X, dateStr: Y, weekNum: Z, revenue: R }
 let weeklyDeposits = { 1: 0, 2: 0, 3: 0, 4: 0 }; // User inputs for Bank deposits
 let weeklySummaries = {}; // Calculated values for each week
 let autoCalcDeposits = true; // Auto-calculate deposits to nearest 50 below
 let weeklyDepositsManuallyEdited = { 1: false, 2: false, 3: false, 4: false };
-let availableYears = [2026];
+let availableYears = [currentYear];
 
 // Chart Instances
 let dailyTrendChart = null;
@@ -35,6 +36,16 @@ if (savedTheme === "chic") {
 
 // Document Ready
 document.addEventListener("DOMContentLoaded", () => {
+  // Check if the application was recently updated
+  const justUpdated = localStorage.getItem("book1_tracker_just_updated");
+  if (justUpdated === "true") {
+    localStorage.removeItem("book1_tracker_just_updated");
+    setTimeout(() => {
+      const versionStr = window.CURRENT_VERSION || "2.5";
+      showToast(`تم التحديث إلى آخر إصدار (v${versionStr}) بنجاح! 🎉`);
+    }, 1500);
+  }
+
   // Sync the theme toggle button appearance
   updateThemeButtonUI(document.body.classList.contains("theme-chic"));
 
@@ -47,10 +58,10 @@ document.addEventListener("DOMContentLoaded", () => {
         availableYears.push(currentYear);
       }
     } catch (e) {
-      availableYears = [2026];
+      availableYears = [currentYear];
     }
   } else {
-    availableYears = [2026];
+    availableYears = [currentYear];
   }
   availableYears.sort((a, b) => a - b);
   

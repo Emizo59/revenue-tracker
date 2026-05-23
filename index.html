@@ -4,10 +4,11 @@
   <meta charset="UTF-8">
   <script>
     // آلية فرض تحديث الكاش والتخلص من الكاش القديم فوراً عند تثبيت نسخة جديدة
-    // قمنا بتحديث النسخة هنا إلى 2.0
-    const CURRENT_VERSION = "2.4";
+    window.CURRENT_VERSION = "2.5";
     const savedVersion = localStorage.getItem("book1_tracker_app_version");
-    if (savedVersion !== CURRENT_VERSION) {
+    if (!savedVersion) {
+      localStorage.setItem("book1_tracker_app_version", window.CURRENT_VERSION);
+    } else if (savedVersion !== window.CURRENT_VERSION) {
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.getRegistrations().then(registrations => {
           for (let registration of registrations) {
@@ -22,7 +23,8 @@
           }
         });
       }
-      localStorage.setItem("book1_tracker_app_version", CURRENT_VERSION);
+      localStorage.setItem("book1_tracker_app_version", window.CURRENT_VERSION);
+      localStorage.setItem("book1_tracker_just_updated", "true");
       // مسح الكاش من الذاكرة المحلية وإعادة تحميل الصفحة فوراً
       setTimeout(() => {
         window.location.reload(true);
@@ -74,7 +76,7 @@
       
       <div style="text-align: center; margin-top: 20px; font-family: 'Outfit', sans-serif; font-size: 0.85rem; font-weight: 600; color: rgba(255, 255, 255, 0.2); letter-spacing: 2.5px; text-transform: uppercase; transition: var(--transition-smooth); cursor: default;" onmouseover="this.style.color='var(--accent-secondary)';" onmouseout="this.style.color='rgba(255, 255, 255, 0.2)';">
         moataz
-        <div style="font-size: 0.65rem; letter-spacing: 1px; color: rgba(255, 255, 255, 0.15); margin-top: 4px; font-weight: 500; text-transform: none;">v2.4</div>
+        <div style="font-size: 0.65rem; letter-spacing: 1px; color: rgba(255, 255, 255, 0.15); margin-top: 4px; font-weight: 500; text-transform: none;">v2.5</div>
       </div>
       
       <div class="sidebar-footer" style="display: flex; flex-direction: column; gap: 10px;">
@@ -301,7 +303,7 @@
 
   <script>
     // آلية فحص التحديثات الفورية الشاملة (المتوافقة مع التشغيل المحلي file:// والويب)
-    const CURRENT_VERSION = "2.4";
+    const CURRENT_VERSION = "2.5";
 
     async function checkUniversalUpdate() {
       if (!navigator.onLine) return;

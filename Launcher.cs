@@ -28,7 +28,7 @@ namespace RevenueTrackerLauncher
                 }
 
                 // إصدار الموارد المدمجة في هذا الملف التنفيذي الحالي
-                double embeddedVersion = 2.4; 
+                double embeddedVersion = 2.5; 
 
                 // قراءة رقم الإصدار المحلي الحالي المخزن في مجلد AppData للجهاز
                 double localVersion = 0.0;
